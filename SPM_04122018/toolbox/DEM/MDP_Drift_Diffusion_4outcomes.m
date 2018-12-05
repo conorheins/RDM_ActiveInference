@@ -6,6 +6,14 @@ color_iter = 1;
 
 for i = 1:0.2:2                     % Change precision on A with each loop
     D{1} = [1 1 1 1]';
+    
+    %% interesting way to initialize likelihood matrix
+%     a = repmat(spm_softmax(exp(i)*log([1,0,0,0]' + 4)),1,4);
+%     shiftindex = [0:3];
+%     [m,n]=size(a);
+%     S=full(sparse(mod(shiftindex,m)+1,1:n,1,m,n));
+%     a_new=ifft(fft(a).*fft(S),'symmetric');
+        
     A{1} = spm_softmax(exp(i)*log(eye(4)+4));
     B{1}(:,:,1) = eye(4);           % Actions do nothing (the two B matrices here are only included to prevent the scheme entering 'HMM mode')
     B{1}(:,:,2) = eye(4);
