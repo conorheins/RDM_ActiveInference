@@ -19,14 +19,14 @@ precis_labels_other = cellfun(@(x)strings_other(x),num2cell(precisions2test),'Un
 color_iter = 1;
 
 all_means_true = zeros(length(precisions2test),T);
-all_errors_true = zeros(length(precisions2test),T);
+all_sems_true = zeros(length(precisions2test),T);
 
 all_means_other = zeros(length(precisions2test),T);
-all_errors_other = zeros(length(precisions2test),T);
+all_sems_other = zeros(length(precisions2test),T);
 
 for i = 1:length(precisions2test)
     precis = precisions2test(i);
-    D{1} = ones(num_outcomes,1);
+%     D{1} = ones(num_outcomes,1);
     A{1} = spm_softmax(exp(precis)*log(eye(num_outcomes)+4));
 %     B{1}(:,:,1) = eye(num_outcomes);           % Actions do nothing (the two B matrices here are only included to prevent the scheme entering 'HMM mode')
 %     B{1}(:,:,2) = eye(num_outcomes);
@@ -51,7 +51,8 @@ for i = 1:length(precisions2test)
 %     all_beliefs = zeros(size(x));
 
     evidence_vecs = -ones(num_outcomes)/(num_outcomes-1) + ((num_outcomes)/(num_outcomes-1))*eye(num_outcomes);
-
+    
+    all_obs = zeros(1,T,num_repeats);
     for rep_i = 1:num_repeats
         
         obs = zeros(1,T);
@@ -59,15 +60,19 @@ for i = 1:length(precisions2test)
             obs(j) = find(rand < cumsum(A{1}(:,true_states(rep_i))),1);
         end
         
+        x_temp = zeros(num_outcomes,T);
+
         for s_i = 1:num_outcomes
-            x(s_i,1,rep_i) = evidence_vecs(s_i,:)*log(A{1}(obs(1),:)');
+            x_temp(s_i,1) = evidence_vecs(s_i,:)*log(A{1}(obs(1),:)');
         end
         
         for s_i = 1:num_outcomes
             for t = 2:T
-                x(s_i,t,rep_i) = x(s_i,t-1) + evidence_vecs(s_i,:) * log(A{1}(obs(t),:)');
+                x(s_i,t,rep_i) = x(s_i,t-1,rep_i) + evidence_vecs(s_i,:) * log(A{1}(obs(t),:)');
             end
         end
+        
+        all_obs(1,:,rep_i) = obs;
         
 %         for s_i = 1:num_outcomes
 %             x(s_i,1,rep_i) = evidence_vecs(s_i,:)*log(MDP(1,rep_i).A{1}(MDP(1,rep_i).o(1),:)');
@@ -94,6 +99,7 @@ for i = 1:length(precisions2test)
     
     true_states_evidence = zeros(1,T,num_repeats);
     other_states_evidence = zeros(1,T,num_repeats);
+    
     for rep_i = 1:num_repeats
         for s_i = 1:num_outcomes
             
@@ -125,10 +131,10 @@ for i = 1:length(precisions2test)
     else
         
         all_means_true(i,:) = squeeze(mean(true_states_evidence,3));
-        all_errors_true(i,:) = squeeze(std(true_states_evidence,0,3))./sqrt(num_repeats);
+        all_sems_true(i,:) = squeeze(std(true_states_evidence,0,3))./sqrt(num_repeats);
         
         all_means_other(i,:) = squeeze(mean(other_states_evidence,3));
-        all_errors_other(i,:) = squeeze(std(other_states_evidence,0,3))./sqrt(num_repeats);
+        all_sems_other(i,:) = squeeze(std(other_states_evidence,0,3))./sqrt(num_repeats);
         
     end
         
@@ -142,11 +148,11 @@ if num_repeats > 10
     
     lineProps.col = mat2cell(precis_colors,ones(size(precis_colors,1),1),3);
     
-    mseb(1:T,all_means_true,all_errors_true,lineProps)
+    mseb(1:T,all_means_true,all_sems_true,lineProps)
     
     lineProps.style = '--';
     hold on;
-    mseb(1:T,all_means_other,all_errors_other,lineProps);
+    mseb(1:T,all_means_other,all_sems_other,lineProps);
     
     legend([precis_labels_true,precis_labels_other])
     
