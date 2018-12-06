@@ -28,21 +28,24 @@ for i = 1:length(precisions2test)
     precis = precisions2test(i);
     D{1} = ones(num_outcomes,1);
     A{1} = spm_softmax(exp(precis)*log(eye(num_outcomes)+4));
-    B{1}(:,:,1) = eye(num_outcomes);           % Actions do nothing (the two B matrices here are only included to prevent the scheme entering 'HMM mode')
-    B{1}(:,:,2) = eye(num_outcomes);
-    C{1} = zeros(num_outcomes,1);
-    
-    for rep_i = 1:num_repeats
-        MDP(1,rep_i).A = A;
-        MDP(1,rep_i).B = B;
-        MDP(1,rep_i).C = C;
-        MDP(1,rep_i).D = D;
-        MDP(1,rep_i).T = T;
-        MDP(1,rep_i).s = randi(num_outcomes)*ones(1,T);
-    end
+%     B{1}(:,:,1) = eye(num_outcomes);           % Actions do nothing (the two B matrices here are only included to prevent the scheme entering 'HMM mode')
+%     B{1}(:,:,2) = eye(num_outcomes);
+%     C{1} = zeros(num_outcomes,1);
+%     
+%     for rep_i = 1:num_repeats
+%         MDP(1,rep_i).A = A;
+%         MDP(1,rep_i).B = B;
+%         MDP(1,rep_i).C = C;
+%         MDP(1,rep_i).D = D;
+%         MDP(1,rep_i).T = T;
+%         MDP(1,rep_i).s = randi(num_outcomes)*ones(1,T);
+%     end
+% 
+%     mdp = spm_MDP_check(MDP);
+%     MDP = spm_MDP_VB_X(mdp);
 
-    mdp = spm_MDP_check(MDP);
-    MDP = spm_MDP_VB_X(mdp);
+
+    true_states = randi(num_outcomes,num_repeats,1);
     
     x = zeros(num_outcomes,T,num_repeats);
 %     all_beliefs = zeros(size(x));
@@ -51,15 +54,30 @@ for i = 1:length(precisions2test)
 
     for rep_i = 1:num_repeats
         
+        obs = zeros(1,T);
+        for j = 1:length(obs)
+            obs(j) = find(rand < cumsum(A{1}(:,true_states(rep_i))),1);
+        end
+        
         for s_i = 1:num_outcomes
-            x(s_i,1,rep_i) = evidence_vecs(s_i,:)*log(MDP(1,rep_i).A{1}(MDP(1,rep_i).o(1),:)');
+            x(s_i,1,rep_i) = evidence_vecs(s_i,:)*log(A{1}(obs(1),:)');
         end
         
         for s_i = 1:num_outcomes
             for t = 2:T
-                x(s_i,t,rep_i) = x(s_i,t-1) + evidence_vecs(s_i,:) * log(MDP(1,rep_i).A{1}(MDP(1,rep_i).o(t),:)');
+                x(s_i,t,rep_i) = x(s_i,t-1) + evidence_vecs(s_i,:) * log(A{1}(obs(t),:)');
             end
         end
+        
+%         for s_i = 1:num_outcomes
+%             x(s_i,1,rep_i) = evidence_vecs(s_i,:)*log(MDP(1,rep_i).A{1}(MDP(1,rep_i).o(1),:)');
+%         end
+%         
+%         for s_i = 1:num_outcomes
+%             for t = 2:T
+%                 x(s_i,t,rep_i) = x(s_i,t-1) + evidence_vecs(s_i,:) * log(MDP(1,rep_i).A{1}(MDP(1,rep_i).o(t),:)');
+%             end
+%         end
     
 %         for s_i = 1:num_outcomes
 %             all_beliefs(s_i,:,rep_i) = cumsum(diag(squeeze(MDP(1,rep_i).xn{1}(end,s_i,:,:))));
@@ -74,15 +92,21 @@ for i = 1:length(precisions2test)
 %     
     end
     
-    true_states = zeros(1,T,num_repeats);
-    other_states = zeros(1,T,num_repeats);
+    true_states_evidence = zeros(1,T,num_repeats);
+    other_states_evidence = zeros(1,T,num_repeats);
     for rep_i = 1:num_repeats
         for s_i = 1:num_outcomes
             
-            if s_i == MDP(1,rep_i).s(1)
-                true_states(1,:,rep_i) = x(s_i,:,rep_i);
+%             if s_i == MDP(1,rep_i).s(1)
+%                 true_states_evidence(1,:,rep_i) = x(s_i,:,rep_i);
+%             else
+%                 other_states_evidence(1,:,rep_i) = x(s_i,:,rep_i);
+%             end
+
+            if s_i == true_states(rep_i)
+                true_states_evidence(1,:,rep_i) = x(s_i,:,rep_i);
             else
-                other_states(1,:,rep_i) = x(s_i,:,rep_i);
+                other_states_evidence(1,:,rep_i) = x(s_i,:,rep_i);
             end
             
         end
@@ -91,20 +115,20 @@ for i = 1:length(precisions2test)
    
     if num_repeats <= 10
         for rep_i = 1:num_repeats
-            plot(squeeze(true_states(1,:,rep_i)),'Color',precis_colors(color_iter,:),'LineWidth',0.1,'DisplayName',sprintf('Decision variable for true state, precision: %.1f',precis));
+            plot(squeeze(true_states_evidence(1,:,rep_i)),'Color',precis_colors(color_iter,:),'LineWidth',0.1,'DisplayName',sprintf('Decision variable for true state, precision: %.1f',precis));
             hold on;
-            plot(squeeze(other_states(1,:,rep_i)),'Color',precis_colors(color_iter,:),'LineWidth',0.1,'DisplayName',sprintf('Decision variable for other states, precision: %.1f',precis));
+            plot(squeeze(other_states_evidence(1,:,rep_i)),'Color',precis_colors(color_iter,:),'LineWidth',0.1,'DisplayName',sprintf('Decision variable for other states, precision: %.1f',precis));
         end
-        plot(squeeze(mean(true_states,3)),'Color',precis_colors(color_iter,:),'LineWidth',2,'DisplayName',sprintf('Average trajectory for true state, precision: %.1f',precis));
-        plot(squeeze(mean(other_states,3)),'Color',precis_colors(color_iter,:),'LineStyle','--','LineWidth',2,'DisplayName',sprintf('Average trajectory for other states, precision: %.1f',precis));
+        plot(squeeze(mean(true_states_evidence,3)),'Color',precis_colors(color_iter,:),'LineWidth',2,'DisplayName',sprintf('Average trajectory for true state, precision: %.1f',precis));
+        plot(squeeze(mean(other_states_evidence,3)),'Color',precis_colors(color_iter,:),'LineStyle','--','LineWidth',2,'DisplayName',sprintf('Average trajectory for other states, precision: %.1f',precis));
         
     else
         
-        all_means_true(i,:) = squeeze(mean(true_states,3));
-        all_errors_true(i,:) = squeeze(std(true_states,0,3))./sqrt(num_repeats);
+        all_means_true(i,:) = squeeze(mean(true_states_evidence,3));
+        all_errors_true(i,:) = squeeze(std(true_states_evidence,0,3))./sqrt(num_repeats);
         
-        all_means_other(i,:) = squeeze(mean(other_states,3));
-        all_errors_other(i,:) = squeeze(std(other_states,0,3))./sqrt(num_repeats);
+        all_means_other(i,:) = squeeze(mean(other_states_evidence,3));
+        all_errors_other(i,:) = squeeze(std(other_states_evidence,0,3))./sqrt(num_repeats);
         
     end
         
