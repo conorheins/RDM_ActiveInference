@@ -60,10 +60,8 @@ for i = 1:length(precisions2test)
             obs(j) = find(rand < cumsum(A{1}(:,true_states(rep_i))),1);
         end
         
-        x_temp = zeros(num_outcomes,T);
-
         for s_i = 1:num_outcomes
-            x_temp(s_i,1) = evidence_vecs(s_i,:)*log(A{1}(obs(1),:)');
+            x_temp(s_i,1,rep_i) = evidence_vecs(s_i,:)*log(A{1}(obs(1),:)');
         end
         
         for s_i = 1:num_outcomes
@@ -80,7 +78,7 @@ for i = 1:length(precisions2test)
 %         
 %         for s_i = 1:num_outcomes
 %             for t = 2:T
-%                 x(s_i,t,rep_i) = x(s_i,t-1) + evidence_vecs(s_i,:) * log(MDP(1,rep_i).A{1}(MDP(1,rep_i).o(t),:)');
+%                 x(s_i,t,rep_i) = x(s_i,t-1,rep_i) + evidence_vecs(s_i,:) * log(MDP(1,rep_i).A{1}(MDP(1,rep_i).o(t),:)');
 %             end
 %         end
     
@@ -98,24 +96,17 @@ for i = 1:length(precisions2test)
     end
     
     true_states_evidence = zeros(1,T,num_repeats);
-    other_states_evidence = zeros(1,T,num_repeats);
+    other_states_evidence = zeros(num_outcomes-1,T,num_repeats);
     
     for rep_i = 1:num_repeats
-        for s_i = 1:num_outcomes
-            
-%             if s_i == MDP(1,rep_i).s(1)
-%                 true_states_evidence(1,:,rep_i) = x(s_i,:,rep_i);
-%             else
-%                 other_states_evidence(1,:,rep_i) = x(s_i,:,rep_i);
-%             end
-
-            if s_i == true_states(rep_i)
-                true_states_evidence(1,:,rep_i) = x(s_i,:,rep_i);
-            else
-                other_states_evidence(1,:,rep_i) = x(s_i,:,rep_i);
-            end
-            
-        end
+        
+        state_idx = 1:num_outcomes;
+%         [~,true_state_idx] = ismember(MDP(1,rep_i).s(1),state_idx);
+        [~,true_state_idx] = ismember(true_states(rep_i),state_idx);
+        
+        true_states_evidence(1,:,rep_i) = x(true_state_idx,:,rep_i);
+        other_states_evidence(:,:,rep_i) = x(state_idx(state_idx~=true_state_idx),:,rep_i);
+        
     end
     
    
@@ -123,18 +114,18 @@ for i = 1:length(precisions2test)
         for rep_i = 1:num_repeats
             plot(squeeze(true_states_evidence(1,:,rep_i)),'Color',precis_colors(color_iter,:),'LineWidth',0.1,'DisplayName',sprintf('Decision variable for true state, precision: %.1f',precis));
             hold on;
-            plot(squeeze(other_states_evidence(1,:,rep_i)),'Color',precis_colors(color_iter,:),'LineWidth',0.1,'DisplayName',sprintf('Decision variable for other states, precision: %.1f',precis));
+            plot(squeeze(sum(other_states_evidence(:,:,rep_i),1)),'Color',precis_colors(color_iter,:),'LineWidth',0.1,'DisplayName',sprintf('Decision variable for other states, precision: %.1f',precis));
         end
         plot(squeeze(mean(true_states_evidence,3)),'Color',precis_colors(color_iter,:),'LineWidth',2,'DisplayName',sprintf('Average trajectory for true state, precision: %.1f',precis));
-        plot(squeeze(mean(other_states_evidence,3)),'Color',precis_colors(color_iter,:),'LineStyle','--','LineWidth',2,'DisplayName',sprintf('Average trajectory for other states, precision: %.1f',precis));
+        plot(squeeze(mean(sum(other_states_evidence,1),3)),'Color',precis_colors(color_iter,:),'LineStyle','--','LineWidth',2,'DisplayName',sprintf('Average trajectory for other states, precision: %.1f',precis));
         
     else
         
         all_means_true(i,:) = squeeze(mean(true_states_evidence,3));
         all_sems_true(i,:) = squeeze(std(true_states_evidence,0,3))./sqrt(num_repeats);
         
-        all_means_other(i,:) = squeeze(mean(other_states_evidence,3));
-        all_sems_other(i,:) = squeeze(std(other_states_evidence,0,3))./sqrt(num_repeats);
+        all_means_other(i,:) = squeeze(mean(sum(other_states_evidence,1),3));
+        all_sems_other(i,:) = squeeze(std(sum(other_states_evidence,1),0,3))./sqrt(num_repeats);
         
     end
         
