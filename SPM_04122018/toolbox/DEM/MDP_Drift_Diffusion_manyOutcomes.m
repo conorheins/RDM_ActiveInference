@@ -61,7 +61,7 @@ for i = 1:length(precisions2test)
         end
         
         for s_i = 1:num_outcomes
-            x_temp(s_i,1,rep_i) = evidence_vecs(s_i,:)*log(A{1}(obs(1),:)');
+            x(s_i,1,rep_i) = evidence_vecs(s_i,:)*log(A{1}(obs(1),:)');
         end
         
         for s_i = 1:num_outcomes

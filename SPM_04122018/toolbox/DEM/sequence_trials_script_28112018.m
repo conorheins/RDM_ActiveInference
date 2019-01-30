@@ -24,7 +24,7 @@ for chi_i = 1:length(chi_values)
         for trial = 1:N
             
             MDPdeep = initialize_MDPdeep(prior_scene_beliefs{trial},prior_precision,all_configs,scene_idx,true_scenes(trial));
-            MDPshallow = initialize_MDPshallow_witha_newp(noise_values(p_i),32);
+            MDPshallow = initialize_MDPshallow_v5(noise_values(p_i),32);
             MDPshallow.chi = chi_values(chi_i);
             % nest the shallow MDP within the deeper one
             MDPdeep.MDP = MDPshallow;

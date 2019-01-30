@@ -1,10 +1,10 @@
-%% DEM_demo_MDP_RDPsearch
+%% DEM_demo_MDP_RDPsearch_LLpolicies
 %  R. Conor Heins, M. Berk Mirza 2018
 %
 %   MDP formulation of a scene construction task (see DEM_demo_MDP_search.m) with
-% 4 different scenes (hidden states), each defined as the co-occurence of 
-% two random dot patterns (RDPs) in a visual array of four quadrants, with each of the
-% two RDPs moving in orthogonal directions: ('UP_RIGHT','RIGHT_DOWN','DOWN_LEFT','LEFT_UP'). 
+%   4 different scenes (hidden states), each defined as the co-occurence of 
+%   two random dot patterns (RDPs) in a visual array of four quadrants, with each of the
+%   two RDPs moving in orthogonal directions: ('UP_RIGHT','RIGHT_DOWN','DOWN_LEFT','LEFT_UP'). 
 %
 %    A hierarchical MDP formulation is used in order to enable independent manipulation 
 %    of  uncertainty/precision at different hierarchical levels. 
@@ -16,6 +16,10 @@
 %    observed as such at the lower level. The likelihood mapping at this first level,
 %    from true-direction to observed direction, can however be manipulated as a model
 %    of sensory uncertainty e.g. incoherent motion of RDPs.
+%    In this version of RDPsearch, policies at this lower level are
+%    perceptual 'decisions' about the true hidden state of the dot pattern
+%    ('UP','RIGHT','DOWN','LEFT')
+%
 % 2. The second (deepest) hierarchical level describes the mapping from the latent scene 
 %    (e.g. 'UP_RIGHT') to 12 unique manifestations of that latent scene (since there are 
 %    12 different ways that an UP-RDP and a RIGHT-RDP can populate two of the four total quadrants).
@@ -23,6 +27,8 @@
 %    agent expect to encounter) through the variables prior_scene_belief
 %    (which scene) and prior_scene_prob (percentage of trials on which agent
 %    expects to see that scene).
+%    The policies at this level are the categorization choices (choices
+%    about the true hidden scene)
 
 % $Id: DEM_demo_MDP_RDPsearch.m 2018-11-14 Conor Heins $
 % $Id: DEM_demo_MDP_RDPsearch.m 2018-11-28 Conor Heins $
@@ -34,13 +40,14 @@
 % a categorical distribution over dot directions, with a 1 at the true dot motion direction
 p = 0.25; 
 
-% temporal depth of updates at the lower level
+% temporal extent of updates at the lower level
 T = 32; 
 
 % depth of 'policies' at lower level
 policy_depth = 1;
 
-MDPshallow = initialize_MDPshallow_v5(p,T,policy_depth);
+MDPshallow = initialize_MDPshallow_v6(p,T,policy_depth);
+MDPshallow.chi = 1/10e20;
 
 %% 2. initialize the second level: the'deepest' MDP -- mapping hidden scenes to RDP directions in the four quadrants
 
@@ -76,7 +83,7 @@ clear MDPdeep MDPshallow;
 MDPresult = spm_MDP_VB_X(MDPfull);
 
 %% Data analysis stuff:
-% solve a sequence with a tiling of different sensory uncertainty values and strengths of prior beliefs
+% solve a sequence with a tiling of different sensory uncertainty values
 
 % [ all_configs,scene_idx ] = generate_scenes();
 % 

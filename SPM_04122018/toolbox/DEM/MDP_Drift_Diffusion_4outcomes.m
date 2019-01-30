@@ -30,7 +30,7 @@ for i = 1:0.2:2                     % Change precision on A with each loop
     MDP = spm_MDP_VB_X(mdp);
     
     x = zeros(4,MDP.T);
-    evidence_vecs = -ones(4) + 2*eye(4);
+    evidence_vecs = -ones(4)/3 + 4/3*eye(4);
     for s_i = 1:4
         x(s_i,1) = evidence_vecs(s_i,:)*log(MDP.A{1}(MDP.o(1),:)');
     end

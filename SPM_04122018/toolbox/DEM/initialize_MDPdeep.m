@@ -96,7 +96,7 @@ for f1 = 1:Ns(1)
             A{1}(3,f1,f2)   = strcmp(all_configs{f1,f2 - 1},'R'); % RIGHT
             A{1}(4,f1,f2)   = strcmp(all_configs{f1,f2 - 1},'D'); % DOWN
             A{1}(5,f1,f2)   = strcmp(all_configs{f1,f2 - 1},'L'); % LEFT
-            A{2}(1,f1,f2)   = 1;                             % null
+            A{2}(1,f1,f2)   = 1;                                  % null
             
         elseif f2 > 5
             
@@ -104,7 +104,7 @@ for f1 = 1:Ns(1)
             %------------------------------------------------------
             A{2}(2,f1,f2) = ceil(f1/num_configs) + 5 == f2; % right
             A{2}(3,f1,f2) = ceil(f1/num_configs) + 5 ~= f2; % wrong
-            A{1}(1,f1,f2)   = 1; % null
+            A{1}(1,f1,f2)   = 1;                            % null
             
         end
         
@@ -155,7 +155,7 @@ MDPdeep.A = A;                      % observation model
 MDPdeep.B = B;                      % transition probabilities
 MDPdeep.C = C;                      % preferred outcomes
 MDPdeep.D = D;                      % prior over initial states
-MDPdeep.s = [true_scene 1]';                 % initial states
+MDPdeep.s = [true_scene 1]';        % initial states
 
 MDPdeep.Aname = {'what','feedback','where'};
 MDPdeep.Bname = {'category_configuration','where'};
