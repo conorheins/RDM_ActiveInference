@@ -86,10 +86,70 @@ title('Prior Precision vs. Sensory Uncertainty: Decision Latency','FontSize',24)
 
 results_dir = uigetdir();
 
-results_fnam = fullfile(results_dir,uigetfile('*.mat'));
+stats_array = {};
+
+num_files = 80;
+
+all_fnams = dir(fullfile(results_dir,'*.mat'));
+all_fnams = {all_fnams(:).name};
+
+tic
+for f_i = 1:num_files
+    
+    str_pat = sprintf('RDPsearch_Hierarch15_%d_',f_i);
+    
+    fidx = find(cellfun(@(x) ~isempty(x), strfind(all_fnams,str_pat)));
+    
+    load(fullfile(results_dir,all_fnams{fidx}))
+    
+    N = length(MDPresult);
+    
+    trial_array = {};
+    
+    for trial = 1:N
+        
+        curr_trial = MDPresult(trial);
+        
+        quadrant_saccades = find(and(curr_trial.o(1,:) > 1, curr_trial.o(1,:) < 6));
+        
+        all_saccades_value_timecourses = NaN(length(quadrant_saccades),T+1,3);
+        
+        for sacc_i = 1:length(quadrant_saccades)
+            
+            % extract epistemic component to the expected free energy
+            EV = curr_trial.mdp(quadrant_saccades(sacc_i)).EV;
+            
+            % look at differential contribution of E.V. to the two policies
+            % (keep sampling current quadrant vs. break/decide)
+            all_saccades_value_timecourses(sacc_i,1:(size(EV,2)+1),1) = [quadrant_saccades(sacc_i),EV(2,:) - EV(1,:)];
+            
+            % extract instrumental/extrinsic component of the expected free energy
+            % look at differential contribution of I.V. to the two policies
+            % (keep sampling current quadrant vs. break/decide)
+            IV = curr_trial.mdp(quadrant_saccades(sacc_i)).G - EV; % in latest version of spm_MDP_VB_X_RCH.m, IV is calculated within the simulation, no need to recalculate here (as of 31.01.2019)
+            all_saccades_value_timecourses(sacc_i,1:(size(IV,2)+1),2) =  [quadrant_saccades(sacc_i),IV(2,:) - IV(1,:)];
+            
+            P = squeeze(curr_trial.mdp(quadrant_saccades(sacc_i)).P);
+            
+            if size(P,1) == 1
+                all_saccades_value_timecourses(sacc_i,1:2,3) = [quadrant_saccades(sacc_i),P(2) - P(1)];
+            else
+                all_saccades_value_timecourses(sacc_i,1:(size(P,2)+1),3) = [quadrant_saccades(sacc_i),P(2,:) - P(1,:)];
+            end
+            
+        end
+        
+        trial_array{trial,1} = all_saccades_value_timecourses;
+        
+    end
+    
+    stats_array{f_i} = {noise_vals,prior_scene_probs,prior_scene_beliefs,true_scenes,trial_array};
+    
+end
+    
+fprintf('Time taken to concatenate stats matrix for all %d files: %.2f minutes\n',num_files,toc/60)
+    
 
 
-%% load data 
 
-load(results_fnam)
 
