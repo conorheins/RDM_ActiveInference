@@ -8,7 +8,7 @@ results_array = []; % initialize empty array to contain results
 
 iter = 1;
 while iter <= 80
-% while iter <= 1
+% while iter <= 2
     %% solve and evaluate performance for sequence of trials
     
     tic
@@ -16,7 +16,7 @@ while iter <= 80
     [ all_configs,scene_idx ] = generate_scenes();
     
     N = 300; % number of trials
-%     N = 10; % debugging
+%     N = 3; % debugging
 
     % randomly initialize agents' beliefs
     prior_scene_beliefs = cell(N,1);
