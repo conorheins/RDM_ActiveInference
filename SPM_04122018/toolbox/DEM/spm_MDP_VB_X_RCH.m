@@ -808,6 +808,7 @@ for t = 1:T
             qu  = 1;                               % posterior
             Q   = zeros(Np(m),1);                  % expected free energy
             EV = zeros(Np(m),1);                   % epistemic value component of expected free energy
+            IV = zeros(Np(m),1);                   % instrumental value component of expected free energy (utility)
             if Np(m) > 1
                 for k = p{m}
                     
@@ -841,7 +842,10 @@ for t = 1:T
                             % prior preferences about outcomes
                             %----------------------------------------------
                             qo   = spm_dot(A{m,g},xq(m,:));
-                            Q(k) = Q(k) + qo'*(C{m,g}(:,j));
+                            IV_temp = qo'*(C{m,g}(:,j));
+                            IV(k) = IV(k) + IV_temp;
+                            Q(k) = Q(k) + IV_temp;
+                            
                             
                             % Bayesian surprise about parameters
                             %----------------------------------------------
@@ -905,6 +909,7 @@ for t = 1:T
             % record (negative) free energies
             %--------------------------------------------------------------
             MDP(m).EV(:,t) = EV; % just saves epistemic value
+            MDP(m).IV(:,t) = IV; % just saves instrumental value
             MDP(m).F(:,t) = F;
             MDP(m).G(:,t) = Q;
             MDP(m).H(1,t) = qu'*MDP(m).F(p{m},t) - qu'*(log(qu) - log(pu));
