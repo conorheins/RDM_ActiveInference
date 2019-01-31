@@ -133,7 +133,11 @@ function [MDP] = spm_MDP_VB_X_RCH(MDP,OPTIONS)
 
 % Karl Friston
 % $Id: spm_MDP_VB_X.m     7398 2018-08-15 14:50:27Z thomas $
-% $Id: spm_MDP_VB_X_RCH.m 7398 2019-01-29 14:50:27Z conor $
+% $Id: spm_MDP_VB_X_RCH.m 7398 2019-01-29 14:50:27Z conor $ cut off loop
+% over time in hierarchical schemes by making the decision to break a
+% policy
+% $Id: spm_MDP_VB_X_RCH.m 7398 2019-01-31 16:27:27Z conor $ save
+% epistemic/instrumental components of expected free energy separately
 
 % deal with a sequence of trials
 %==========================================================================
