@@ -15,9 +15,10 @@ high_edge = 0.5;
 dot_coords = low_edge + (high_edge - low_edge).* rand(500,2);
 dot_coords = dot_coords(inpolygon(dot_coords(:,1),dot_coords(:,2),boundary_x,boundary_y),:);
 figure('Position',[100 800 350 300])
-scatter(dot_coords(:,1),dot_coords(:,2),200,'k.')
+h = scatter(dot_coords(:,1),dot_coords(:,2),200,'k.');
 hold on; arrow3([0 -0.3],[0 0.3],'b-7',7,5,[],1);
 set(gca,'Visible','off')
+delete(h);
 currIm = getframe(gca);
 UP = currIm.cdata;
 close gcf;
@@ -26,9 +27,10 @@ close gcf;
 dot_coords = low_edge + (high_edge - low_edge).* rand(500,2);
 dot_coords = dot_coords(inpolygon(dot_coords(:,1),dot_coords(:,2),boundary_x,boundary_y),:);
 figure('Position',[100 800 350 300])
-scatter(dot_coords(:,1),dot_coords(:,2),200,'k.')
+h = scatter(dot_coords(:,1),dot_coords(:,2),200,'k.')
 hold on; arrow3([-0.3 0],[0.3 0],'b-7',7,5,[],1);
 set(gca,'Visible','off')
+delete(h);
 currIm = getframe(gca);
 RIGHT = currIm.cdata;
 close gcf;
@@ -37,9 +39,10 @@ close gcf;
 dot_coords = low_edge + (high_edge - low_edge).* rand(500,2);
 dot_coords = dot_coords(inpolygon(dot_coords(:,1),dot_coords(:,2),boundary_x,boundary_y),:);
 figure('Position',[100 800 350 300])
-scatter(dot_coords(:,1),dot_coords(:,2),200,'k.')
+h = scatter(dot_coords(:,1),dot_coords(:,2),200,'k.')
 hold on; arrow3([0 0.3],[0 -0.3],'b-7',7,5,[],1);
 set(gca,'Visible','off')
+delete(h);
 currIm = getframe(gca);
 DOWN = currIm.cdata;
 close gcf;
@@ -48,11 +51,12 @@ close gcf;
 dot_coords = low_edge + (high_edge - low_edge).* rand(500,2);
 dot_coords = dot_coords(inpolygon(dot_coords(:,1),dot_coords(:,2),boundary_x,boundary_y),:);
 figure('Position',[100 800 350 300])
-scatter(dot_coords(:,1),dot_coords(:,2),200,'k.')
+h = scatter(dot_coords(:,1),dot_coords(:,2),200,'k.')
 hold on; arrow3([0.3 0],[-0.3 0],'b-7',7,5,[],1);
 set(gca,'Visible','off')
+delete(h);
 currIm = getframe(gca);
 LEFT = currIm.cdata;
 close gcf;
 
-save('MDP_search_graphics_DOT.mat','UP','RIGHT','DOWN','LEFT')
+save('MDP_search_graphics_DOT_newest.mat','UP','RIGHT','DOWN','LEFT')

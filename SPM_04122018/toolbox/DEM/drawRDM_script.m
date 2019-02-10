@@ -1,7 +1,7 @@
 % draw RDM script, calls drawRDM_multi for animation
 
 npatterns = 4;
-T = 100;
+T = 50;
 
 centers = [-5 5 ; 
           -5 -5 ;
@@ -46,7 +46,7 @@ movie = drawRDM_multi(dotParams,T);
 
 for t = 1:T
     imshow(movie(:,:,:,t));
-    pause(0.1);
+    pause(0.025);
 end
 
 

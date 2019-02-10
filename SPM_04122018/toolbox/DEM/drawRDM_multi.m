@@ -70,8 +70,8 @@ for patt_i = 1:nPatterns
     
     % initialize motion vectors of all dots to random directions
     
-%     rand_directions = 90.*randi(4,1,dotParams(patt_i).nDots) .* pi/180;
-    rand_directions = 360.*rand(1,dotParams(patt_i).nDots) .* pi/180;
+    rand_directions = 90.*randi(4,1,dotParams(patt_i).nDots) .* pi/180;
+%     rand_directions = 360.*rand(1,dotParams(patt_i).nDots) .* pi/180;
     
     dx_temp = 0.2*sin(rand_directions);
     dy_temp = -0.2*cos(rand_directions);
