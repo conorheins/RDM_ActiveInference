@@ -4,6 +4,8 @@ duration = 5; % how long to show the dots in seconds
 curScreen = 0;
 dontclear = 0;
 
+Screen('Preference', 'SkipSyncTests', 1)
+
 [curWindow, screenRect] = Screen('OpenWindow', curScreen, [0,0,0],[],32, 2);
 
 % Enable alpha blending with proper blend-function. We need it for drawing

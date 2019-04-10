@@ -14,7 +14,7 @@ function M = displayDots(ScreenInfo,dotParams,duration,make_movie_flag)
 %                       movie that can subsequently be written to disk as .gif, for
 %                       instance
 
-M = []
+M = [];
 
 numPatches = length(dotParams);
 if numPatches > 4
@@ -49,7 +49,7 @@ dotSize = [dotParams(:).dotSize];
 apD = ScreenInfo.apD;
 monRefresh = ScreenInfo.monRefresh;
 
-maxDotsPerFrame = 150; % By trial and error and depends on graphics card
+maxDotsPerFrame = 20; % By trial and error and depends on graphics card
 
 % ndots is the number of dots shown per video frame. Dots are placed in a
 % square of the size of the aperture.
@@ -59,7 +59,7 @@ maxDotsPerFrame = 150; % By trial and error and depends on graphics card
 % a video frame.
 
 % ndots = min(maxDotsPerFrame, ceil(16.7 * apD .* apD * 0.01 / monRefresh));
-ndots = 50;
+ndots = 10;
 
 % dxdy is an N x 2 matrix that gives jumpsize in units on 0..1
 %   deg/sec * Ap-unit/deg * sec/jump = unit/jump
@@ -148,7 +148,10 @@ while continue_show
         % Now do next drawing commands
 
         Screen('DrawDots', curWindow, dot_show, dotSize(i), [255 255 255], centers(i,:));
-        Screen('DrawDots', curWindow, [0; 0], 10, [255 0 0], fix_center, 1);   
+        Screen('DrawDots', curWindow, [0; 0], 10, [255 0 0], fix_center, 1); 
+        
+%         Screen('DrawingFinished',curWindow,dontclear);
+
     end
     
     % Presentation

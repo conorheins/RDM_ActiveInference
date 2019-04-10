@@ -16,6 +16,7 @@ dontclear = 0;
 [curWindow, screenRect] = Screen('OpenWindow', curScreen, [0,0,0],[],32, 2);
 if nargin < 4 || isempty(sub_rect)
     ScreenInfo.screenRect = screenRect;
+%     Screen('Preference', 'SkipSyncTests', 0)
 elseif exist('sub_rect','var') && sum(sub_rect == screenRect) < 4
     sca;
     Screen('Preference', 'SkipSyncTests', 1);
