@@ -112,6 +112,8 @@ while continue_show
         loopi = 1;
     end
     
+    all_dots_show = cell(1,numPatches);
+    
     for i = 1:numPatches
         
         % Compute new locations
@@ -142,16 +144,29 @@ while continue_show
         this_x(:,1:2,i) = floor(ScreenInfo.d_ppd * this_ss(:,:,i)); % pix/ApUnit for first dot pattern
 
         dot_show = (this_x(:,1:2,i) - ScreenInfo.d_ppd/2)';
+        
+        all_dots_show{i} = dot_show;
 
-        % After all computations, flip
-        Screen('Flip', curWindow,0,dontclear);
-        % Now do next drawing commands
-
-        Screen('DrawDots', curWindow, dot_show, dotSize(i), [255 255 255], centers(i,:));
-        Screen('DrawDots', curWindow, [0; 0], 10, [255 0 0], fix_center, 1); 
+%         % After all computations, flip
+%         Screen('Flip', curWindow,0,dontclear);
+%         % Now do next drawing commands
+% 
+%         Screen('DrawDots', curWindow, dot_show, dotSize(i), [255 255 255], centers(i,:));
+%         Screen('DrawDots', curWindow, [0; 0], 10, [255 0 0], fix_center, 1); 
         
 %         Screen('DrawingFinished',curWindow,dontclear);
 
+    end
+    
+    % After all computations, flip
+    Screen('Flip', curWindow,0,dontclear);
+    % Now do next drawing commands
+    
+    for i = 1:numPatches
+    
+        Screen('DrawDots', curWindow, all_dots_show{i}, dotSize(i), [255 255 255], centers(i,:));
+        Screen('DrawDots', curWindow, [0; 0], 10, [255 0 0], fix_center, 1);
+        
     end
     
     % Presentation
@@ -169,7 +184,7 @@ while continue_show
     end
     
     % Update the arrays so xor works next time
-    xs1(Lthis,:,:) = this_x;
+    xs(Lthis,:,:) = this_x;
     ss(Lthis,:,:) = this_ss;
     
     % Check for end of loop
